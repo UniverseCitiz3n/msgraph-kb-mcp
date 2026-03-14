@@ -1,16 +1,88 @@
 # msgraph-kb-mcp
 
-A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides **Microsoft Graph API knowledge** by cloning the [`merill/msgraph`](https://github.com/merill/msgraph) repository at startup and exposing its contents as searchable tools.
+A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that provides **Microsoft Graph API knowledge** — search 27,000+ endpoints, look up permissions, and get code samples, all from your AI assistant.
 
-## Features
+## Quick start
 
-- Automatically fetches the latest release of `merill/msgraph` at startup
-- Indexes 27 000+ Graph API endpoints with descriptions and permissions
-- Exposes 5 MCP tools for querying the index
-- Works headless via **stdio** transport (Windows and Linux compatible)
-- Falls back gracefully if the clone fails — server still starts, tools return descriptive errors
+No local installation required. Use `npx` to run the server on-demand:
 
-## Tools
+```bash
+npx github:UniverseCitiz3n/msgraph-kb-mcp
+```
+
+> **Prerequisites:** Node.js ≥ 18 and `git` available on your PATH environment variable.
+
+---
+
+## Install in your MCP client
+
+### VS Code (GitHub Copilot)
+
+Add to `.vscode/mcp.json` in your workspace (create the file if it doesn't exist):
+
+```json
+{
+  "servers": {
+    "msgraph-kb": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "github:UniverseCitiz3n/msgraph-kb-mcp"]
+    }
+  }
+}
+```
+
+### Claude Desktop
+
+Edit your Claude Desktop config file:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "msgraph-kb": {
+      "command": "npx",
+      "args": ["-y", "github:UniverseCitiz3n/msgraph-kb-mcp"]
+    }
+  }
+}
+```
+
+### Claude Code
+
+Add to your project's `mcp.json` file:
+
+```json
+{
+  "mcpServers": {
+    "msgraph-kb": {
+      "command": "npx",
+      "args": ["-y", "github:UniverseCitiz3n/msgraph-kb-mcp"]
+    }
+  }
+}
+```
+
+### GitHub Copilot Coding Agent (repository settings)
+
+In your repository's **Settings → Copilot → MCP servers**, add:
+
+```json
+{
+  "mcpServers": {
+    "msgraph-kb": {
+      "command": "npx",
+      "args": ["-y", "github:UniverseCitiz3n/msgraph-kb-mcp"]
+    }
+  }
+}
+```
+
+---
+
+## Available tools
 
 | Tool | Input | Description |
 |---|---|---|
@@ -20,66 +92,44 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that p
 | `list_permissions` | `endpoint` (string) | Delegated and application permissions |
 | `get_server_info` | _(none)_ | Data version, clone timestamp, index stats |
 
-## Running locally
+---
 
-### Prerequisites
+## Local development
 
-- Node.js ≥ 18
-- `git` available on `PATH`
-
-### Install and run
+Clone the repo, install dependencies, and build:
 
 ```bash
+git clone https://github.com/UniverseCitiz3n/msgraph-kb-mcp.git
+cd msgraph-kb-mcp
 npm install
 npm run build
 node dist/index.js
 ```
 
-Or directly via npx (after publishing):
-
-```bash
-npx github:UniverseCitiz3n/msgraph-kb-mcp
-```
-
-## MCP configuration
-
-### Claude Code (`mcp.json`)
+Point any MCP client at the built binary:
 
 ```json
 {
   "mcpServers": {
     "msgraph-kb": {
       "command": "node",
-      "args": ["/path/to/msgraph-kb-mcp/dist/index.js"]
+      "args": ["/absolute/path/to/msgraph-kb-mcp/dist/index.js"]
     }
   }
 }
 ```
 
-### GitHub Copilot Coding Agent (repository settings)
+---
 
-Add to your repository's MCP server configuration (`.github/copilot-mcp.json` or equivalent):
+## How it works
 
-```json
-{
-  "mcpServers": {
-    "msgraph-kb": {
-      "command": "node",
-      "args": ["dist/index.js"],
-      "cwd": "${workspaceFolder}"
-    }
-  }
-}
-```
+At startup the server fetches the latest release of [`merill/msgraph`](https://github.com/merill/msgraph) and builds a searchable in-memory index from files under `skills/msgraph/references/`:
 
-## Data source
+- `graph-api-index.json` — endpoint paths, HTTP methods, summaries
+- `api-docs-index.json` — permissions, notes, query parameters
+- `samples-index.json` — sample queries
 
-This server clones [https://github.com/merill/msgraph](https://github.com/merill/msgraph) at the latest tagged release. The clone is stored in `os.tmpdir()/msgraph-skill-{timestamp}` and cleaned up on process exit.
-
-The index is built from:
-- `skills/msgraph/references/graph-api-index.json` — endpoint paths, methods, summaries
-- `skills/msgraph/references/api-docs-index.json` — permissions, notes, query parameters
-- `skills/msgraph/references/samples-index.json` — sample queries
+The clone is stored in a temporary directory and removed on process exit. If the clone fails the server still starts — tools will return a descriptive error until data is available.
 
 ## License
 
