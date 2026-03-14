@@ -73,8 +73,10 @@ In your repository's **Settings → Copilot → MCP servers**, add:
 {
   "mcpServers": {
     "msgraph-kb": {
+      "type": "local",
       "command": "npx",
-      "args": ["-y", "github:UniverseCitiz3n/msgraph-kb-mcp"]
+      "args": ["-y", "github:UniverseCitiz3n/msgraph-kb-mcp"],
+      "tools": ["*"]
     }
   }
 }
