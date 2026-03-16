@@ -103,6 +103,21 @@ In your repository's **Settings → Copilot → MCP servers**, add:
 
 ---
 
+## Endpoint advisories
+
+The server can attach `advisories` to endpoint results when known real-world behavior differs from indexed metadata.
+
+Current advisory:
+
+- Intune DeviceConfigV2 caveat for `PATCH /deviceManagement/configurationPolicies/{deviceManagementConfigurationPolicy-id}/settings/{deviceManagementConfigurationSetting-id}`.
+- If this route returns a route-mismatch error in your tenant, prefer:
+  - `PUT /deviceManagement/configurationPolicies('{deviceManagementConfigurationPolicy-id}')`
+  - Include the full policy payload with embedded `settings`.
+
+These advisories are additive guidance and do not replace official Graph documentation.
+
+---
+
 ## Local development
 
 Clone the repo, install dependencies, and build:

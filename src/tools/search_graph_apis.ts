@@ -1,5 +1,9 @@
 import { RepoIndex } from "../loader.js";
 import { searchEndpoints } from "../search.js";
+import {
+  EndpointAdvisory,
+  getEndpointAdvisories,
+} from "../endpoint_advisories.js";
 
 export interface SearchGraphApisInput {
   query: string;
@@ -19,6 +23,7 @@ export interface SearchGraphApisResult {
       delegatedPersonal?: string[];
       application?: string[];
     };
+    advisories?: EndpointAdvisory[];
   }>;
   error?: string;
 }
@@ -49,6 +54,7 @@ export function searchGraphApis(
       summary: r.summary,
       description: r.description,
       permissions: r.permissions,
+      advisories: getEndpointAdvisories(r.path, r.method),
     })),
   };
 }

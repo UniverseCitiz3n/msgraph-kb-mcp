@@ -1,5 +1,9 @@
 import { RepoIndex } from "../loader.js";
 import { findEndpointsByPath } from "../search.js";
+import {
+  EndpointAdvisory,
+  getEndpointAdvisories,
+} from "../endpoint_advisories.js";
 
 export interface GetApiDetailsInput {
   endpoint: string;
@@ -19,6 +23,7 @@ export interface ApiDetails {
   notes?: string[];
   queryParams?: string[];
   availability?: string;
+  advisories?: EndpointAdvisory[];
 }
 
 export interface GetApiDetailsResult {
@@ -60,6 +65,7 @@ export function getApiDetails(
     notes: ep.notes,
     queryParams: ep.queryParams,
     availability: index.apiVersion || undefined,
+    advisories: getEndpointAdvisories(ep.path, ep.method),
   }));
 
   return {
