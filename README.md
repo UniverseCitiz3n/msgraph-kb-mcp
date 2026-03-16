@@ -18,7 +18,14 @@ npx github:UniverseCitiz3n/msgraph-kb-mcp
 
 ### VS Code (GitHub Copilot)
 
-Add to `.vscode/mcp.json` in your workspace (create the file if it doesn't exist):
+Install with one click:
+
+| Platform | VS Code | VS Code Insiders |
+|---|---|---|
+| **macOS / Linux** | [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=ffffff)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22msgraph-kb%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22github%3AUniverseCitiz3n%2Fmsgraph-kb-mcp%22%5D%7D) | [![Install in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Install_Server-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=ffffff)](https://vscode.dev/redirect?url=vscode-insiders:mcp/install?%7B%22name%22%3A%22msgraph-kb%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22github%3AUniverseCitiz3n%2Fmsgraph-kb-mcp%22%5D%7D) |
+| **Windows** | [![Install in VS Code](https://img.shields.io/badge/VS_Code-Install_Server-0098FF?style=flat-square&logo=visualstudiocode&logoColor=ffffff)](https://vscode.dev/redirect?url=vscode:mcp/install?%7B%22name%22%3A%22msgraph-kb%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22cmd%22%2C%22args%22%3A%5B%22%2Fc%22%2C%22npx%22%2C%22-y%22%2C%22github%3AUniverseCitiz3n%2Fmsgraph-kb-mcp%22%5D%7D) | [![Install in VS Code Insiders](https://img.shields.io/badge/VS_Code_Insiders-Install_Server-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=ffffff)](https://vscode.dev/redirect?url=vscode-insiders:mcp/install?%7B%22name%22%3A%22msgraph-kb%22%2C%22type%22%3A%22stdio%22%2C%22command%22%3A%22cmd%22%2C%22args%22%3A%5B%22%2Fc%22%2C%22npx%22%2C%22-y%22%2C%22github%3AUniverseCitiz3n%2Fmsgraph-kb-mcp%22%5D%7D) |
+
+Or add manually to `.vscode/mcp.json` in your workspace (create the file if it doesn't exist):
 
 ```json
 {
