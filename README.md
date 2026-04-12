@@ -155,6 +155,11 @@ At startup the server fetches the latest release of [`merill/msgraph`](https://g
 
 The clone is stored in a temporary directory and removed on process exit. If the clone fails the server still starts — tools will return a descriptive error until data is available.
 
+### Search relevance
+
+- Queries are normalized to drop stopwords, de-pluralize terms, and fix common typos (for example, `bussines` → `business`).
+- Windows Update for Business driver profile routes (including driver inventories) get an extra relevance boost so natural language prompts surface the right endpoints without pasting raw URLs.
+
 ## License
 
 MIT
