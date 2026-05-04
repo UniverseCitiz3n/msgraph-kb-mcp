@@ -189,51 +189,71 @@ function buildIndex(repoDir: string): {
   };
 }
 
+function getCacheDir(tagName: string): string {
+  const base =
+    process.env["LOCALAPPDATA"] ??
+    path.join(os.homedir(), ".cache");
+  return path.join(base, "msgraph-kb-mcp", tagName || "latest");
+}
+
+function isCacheValid(repoDir: string, tagName: string): boolean {
+  const markerFile = path.join(repoDir, ".tag");
+  if (!fs.existsSync(markerFile)) return false;
+  try {
+    const cached = fs.readFileSync(markerFile, "utf-8").trim();
+    return cached === tagName;
+  } catch {
+    return false;
+  }
+}
+
 export async function loadIndex(): Promise<RepoIndex> {
   const cloneTimestamp = new Date().toISOString();
   const tagName = await resolveLatestTag();
 
-  const tmpBase = os.tmpdir();
-  const repoDir = path.join(
-    tmpBase,
-    `msgraph-skill-${Date.now()}`
-  );
+  const repoDir = getCacheDir(tagName);
 
-  try {
+  if (isCacheValid(repoDir, tagName)) {
     process.stderr.write(
-      `[msgraph-kb-mcp] Cloning merill/msgraph${tagName ? ` @ ${tagName}` : " (default branch)"}...\n`
+      `[msgraph-kb-mcp] Using cached repo for ${tagName || "latest"}: ${repoDir}\n`
     );
-    await cloneRepo(tagName, repoDir);
-    process.stderr.write(`[msgraph-kb-mcp] Clone complete: ${repoDir}\n`);
-  } catch (err) {
-    process.stderr.write(
-      `[msgraph-kb-mcp] ERROR: Clone failed: ${String(err)}\n`
-    );
-    // Return empty index so server still starts
-    return {
-      tagName,
-      cloneTimestamp,
-      repoDir: "",
-      endpoints: [],
-      samplesIndex: { samples: [] },
-      apiCount: 0,
-      sampleCount: 0,
-      apiVersion: "",
-      endpointMap: new Map(),
-    };
-  }
-
-  // Register cleanup on exit
-  const cleanup = () => {
+  } else {
+    // Clone to a temp staging dir, then atomically replace cache dir.
+    // This avoids partial-state issues if a previous clone was interrupted.
+    const stagingDir = `${repoDir}-staging-${Date.now()}`;
     try {
-      fs.rmSync(repoDir, { recursive: true, force: true });
-    } catch {
-      // ignore cleanup errors
+      process.stderr.write(
+        `[msgraph-kb-mcp] Cloning merill/msgraph${tagName ? ` @ ${tagName}` : " (default branch)"}...\n`
+      );
+      await cloneRepo(tagName, stagingDir);
+      fs.writeFileSync(path.join(stagingDir, ".tag"), tagName, "utf-8");
+
+      // Remove stale cache dir (may have read-only .git files on Windows)
+      if (fs.existsSync(repoDir)) {
+        await execFileAsync("cmd", ["/c", "rmdir", "/s", "/q", repoDir], { timeout: 30_000 });
+      }
+      fs.renameSync(stagingDir, repoDir);
+      process.stderr.write(`[msgraph-kb-mcp] Clone complete: ${repoDir}\n`);
+    } catch (err) {
+      // Clean up staging dir if it exists
+      try { await execFileAsync("cmd", ["/c", "rmdir", "/s", "/q", stagingDir], { timeout: 30_000 }); } catch { /* ignore */ }
+      process.stderr.write(
+        `[msgraph-kb-mcp] ERROR: Clone failed: ${String(err)}\n`
+      );
+      // Return empty index so server still starts
+      return {
+        tagName,
+        cloneTimestamp,
+        repoDir: "",
+        endpoints: [],
+        samplesIndex: { samples: [] },
+        apiCount: 0,
+        sampleCount: 0,
+        apiVersion: "",
+        endpointMap: new Map(),
+      };
     }
-  };
-  process.on("exit", cleanup);
-  process.on("SIGINT", () => { cleanup(); process.exit(0); });
-  process.on("SIGTERM", () => { cleanup(); process.exit(0); });
+  }
 
   const { endpoints, samplesIndex, apiVersion } = buildIndex(repoDir);
 
